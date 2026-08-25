@@ -205,6 +205,24 @@ dsh-whale-widget/
     └── assets-第二版/         # 第二版素材原图（参考）
 ```
 
+## 📸 截图
+
+| 功能 | 截图 |
+|------|------|
+| 两版表情切换 | ![两版切换](docs/screenshots/两版表情版本切换.png) |
+| 手动表情选择 | ![手动表情](docs/screenshots/表情可手动选择固定.png) |
+| 自定义台词 | ![自定义台词](docs/screenshots/自定义台词.png) |
+| 台词手动切换 | ![台词切换](docs/screenshots/台词可手动切换.png) |
+| 第一版总览 | ![第一版](docs/screenshots/版本1总览.png) |
+| 第二版总览 | ![第二版](docs/screenshots/版本2总览.png) |
+
+更多截图：`docs/screenshots/`（版本1-1~4、版本2-1~2 细节图）。
+
+## 🖼️ 表情预览
+
+**第一版**（18 张）：`docs/assets-第一版/`
+**第二版**（32 张）：`docs/assets-第二版/`
+
 ## 🙏 致谢
 
 基于 B站「月匠」的 DSH 小鲸鱼余额挂件（npm `dsh-whale-widget`）二次开发；表情素材来自 MeteorNOX/DeepSeek-Balance-Whale-Widget 桌面版二创，经人工校色；功能大幅扩展。
