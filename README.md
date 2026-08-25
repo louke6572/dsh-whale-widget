@@ -1,8 +1,15 @@
-# DSH 小鲸鱼余额挂件 · 双版本表情版
+<p align="center">
+  <img src="assets/DSH2.png" width="820" alt="DSH 小鲸鱼余额挂件">
+</p>
 
-> dsh-whale-widget — DeepSeek Harness 网页右下角的常驻小鲸鱼挂件，支持**两套表情素材切换**、火山 Coding Plan 用量 / DeepSeek 余额双模式、情绪动画与自定义台词。
+<h1 align="center">DSH 小鲸鱼余额挂件 · 双版本表情版</h1>
 
-**仓库**: https://github.com/louke6572/dsh-whale-widget
+<p align="center">
+  dsh-whale-widget — DeepSeek Harness 网页右下角的常驻小鲸鱼挂件<br>
+  <strong>两套表情素材切换</strong> · 火山 Coding Plan 用量 / DeepSeek 余额双模式 · 情绪动画 · 自定义台词
+</p>
+
+---
 
 ## ✨ 功能亮点
 
