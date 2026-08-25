@@ -5,7 +5,7 @@
 <h1 align="center">DSH 小鲸鱼余额挂件 · 双版本表情版</h1>
 
 <p align="center">
-  dsh-whale-widget — DeepSeek Harness 网页右下角的常驻小鲸鱼挂件<br>
+  dsh-whale-widget-plus — DeepSeek Harness 网页右下角的常驻小鲸鱼挂件<br>
   <strong>两套表情素材切换</strong> · 火山 Coding Plan 用量 / DeepSeek 余额双模式 · 情绪动画 · 自定义台词
 </p>
 
@@ -46,10 +46,10 @@
 
 ```bash
 # 1. 鲸鱼挂件本体
-dsh plugin --profile web add link:C:\path\to\dsh-whale-widget
+dsh plugin --profile web add link:C:\path\to\dsh-whale-widget-plus
 
 # 2. 火山数据源（火山模式必需，DeepSeek-only 可跳过）
-dsh plugin --profile web add link:C:\path\to\dsh-whale-widget\plugins\volc-usage
+dsh plugin --profile web add link:C:\path\to\dsh-whale-widget-plus\plugins\volc-usage
 ```
 
 重启 dsh web，浏览器 **Ctrl+F5** 强刷即可看到小鲸鱼。
@@ -72,7 +72,7 @@ dsh plugin --profile web add link:C:\path\to\dsh-whale-widget\plugins\volc-usage
 │            │                              │  │   轮换 ACTIVE key │  │
 │            │                              │  └───────────────────┘  │
 │            │                              │  ┌───────────────────┐  │
-│            │                              │  │ dsh-whale-widget  │  │
+│            │                              │  │ dsh-whale-widget-plus  │  │
 │            │                              │  │ · DeepSeek 余额   │  │
 │            │                              │  │   /user/balance   │  │
 │            │                              │  │ · 今日已用(峰谷)   │  │
@@ -194,7 +194,7 @@ VOLCES_API_KEY_2: ...
 ## 📁 目录结构
 
 ```
-dsh-whale-widget/
+dsh-whale-widget-plus/
 ├── lib/index.js              # 鲸鱼挂件本体（Node 路由 + 前端 WIDGET_JS）
 ├── plugins/volc-usage/       # 配套：火山用量数据源插件
 │   ├── lib/index.js          #   后端：火山 OpenAPI 直连 + 多账号轮换
@@ -232,7 +232,7 @@ dsh-whale-widget/
 
 ## 🙏 致谢
 
-基于 B站「月匠」的 DSH 小鲸鱼余额挂件（npm `dsh-whale-widget`）二次开发；表情素材来自 MeteorNOX/DeepSeek-Balance-Whale-Widget 桌面版二创，经人工校色；功能大幅扩展。
+基于 B站「月匠」的 DSH 小鲸鱼余额挂件（npm `dsh-whale-widget-plus`）二次开发；表情素材来自 MeteorNOX/DeepSeek-Balance-Whale-Widget 桌面版二创，经人工校色；功能大幅扩展。
 
 ## 📄 许可证
 
