@@ -1,0 +1,9 @@
+# 测试/临时文件
+lib/__mock_head.js
+lib/__run.js
+__pycache__/
+*.pyc
+
+# 系统
+Thumbs.db
+.DS_Store
