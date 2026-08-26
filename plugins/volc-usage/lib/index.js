@@ -1,6 +1,7 @@
 // 火山引擎方舟编程套餐用量 + 多账号自动轮询 — 宿主端插件
 // 真实 Node 插件：https + crypto 直连火山 OpenAPI。
-// 轮询规则：会话级用量 ≥90% 时自动把生效的方舟推理 key 切到下一个账号（优先账号1）。
+// 轮询规则：会话级用量 ≥90% 或月度用量 ≥90% 时自动把生效的方舟推理 key
+// 切到余量最大的账号（优先账号1）。
 import https from "node:https";
 import crypto from "node:crypto";
 import fs from "node:fs";
@@ -150,32 +151,50 @@ function parseResult(resp) {
   return parsed.Result || null;
 }
 
-function sessionPct(result) {
+function pctOf(result, level) {
   const rows = (result && result.QuotaUsage) || [];
-  for (const q of rows) if (q.Level === "session") return Number(q.Percent) || 0;
-  return 0;
+  for (const q of rows) if (q.Level === level) return Number(q.Percent);
+  return null;
+}
+function sessionPct(result) {
+  const p = pctOf(result, "session");
+  return p === null || !isFinite(p) ? 0 : p;
+}
+function monthlyPct(result) {
+  const p = pctOf(result, "monthly");
+  return p === null || !isFinite(p) ? 0 : p;
+}
+
+// 账号是否"已耗尽/将耗尽"：月度额度 ≥90% 视为不可用（月度用完会在请求时被 429 拒绝，
+// 只看 session 会导致"session 没满但 monthly 已尽"的账号被继续选中 → AccountQuotaExceeded）。
+function quotaExhausted(q) {
+  return q.ok && (q.monthly >= 90);
 }
 
 function chooseActiveIdx(quota) {
   const available = quota.filter((q) => q.ok && q.session !== null);
   if (available.length === 0) return null;
-  const below = available.filter((q) => q.session < ROTATE_THRESHOLD);
+  // 优先选"未耗尽"的账号（session 和 monthly 都 < 90%）
+  const usable = available.filter((q) => !quotaExhausted(q));
+  const pool = usable.length > 0 ? usable : available;
+  // 在可用池里挑 session 最低的（回落到账号1 优先的原有策略）
+  const below = pool.filter((q) => q.session < ROTATE_THRESHOLD);
   if (below.length > 0) {
     const acc1 = below.find((q) => q.idx === 1);
     if (acc1) return acc1.idx;
     return below.reduce((a, b) => (a.session <= b.session ? a : b)).idx;
   }
-  return available.reduce((a, b) => (a.session <= b.session ? a : b)).idx;
+  return pool.reduce((a, b) => (a.session <= b.session ? a : b)).idx;
 }
 
 async function queryQuota(accounts) {
   return Promise.all(
     accounts.map(async (acc) => {
       try {
-        const resp = await callVolc(acc.ak, acc.sk, "ark", "GetCodingPlanUsage", "2024-01-01", {});
-        return { idx: acc.idx, session: sessionPct(parseResult(resp)), ok: true };
+        const result = parseResult(await callVolc(acc.ak, acc.sk, "ark", "GetCodingPlanUsage", "2024-01-01", {}));
+        return { idx: acc.idx, session: sessionPct(result), monthly: monthlyPct(result), ok: true };
       } catch (e) {
-        return { idx: acc.idx, session: null, ok: false };
+        return { idx: acc.idx, session: null, monthly: null, ok: false };
       }
     }),
   );
@@ -226,7 +245,7 @@ async function rotateOnce(ctx) {
     const activeKey = arkKeys[activeIdx];
     if (!activeKey) return;
     const current = (await credentials.resolve("VOLCES_ACTIVE_API_KEY"))?.value;
-    debugLog(`quota=${quota.map((q) => `#${q.idx}:${q.ok ? q.session.toFixed(1) + "%" : "ERR"}`).join(" ")} chosen=${activeIdx} current=${current ? current.slice(-8) : "NONE"}`);
+    debugLog(`quota=${quota.map((q) => `#${q.idx}:${q.ok ? "s" + q.session.toFixed(1) + "%/m" + (q.monthly !== null ? q.monthly.toFixed(1) + "%" : "?") : "ERR"}`).join(" ")} chosen=${activeIdx} current=${current ? current.slice(-8) : "NONE"}`);
     if (current === activeKey) return;
     // 当前 key 是不参与用量轮询的账号（如只有推理 key 的账号3，通常是 429 切换过去的）——保持不动
     if (current && Object.values(arkKeys).includes(current) &&
@@ -261,9 +280,11 @@ function startRotation(ctx) {
   };
 }
 
-// —— 429 限流即时切换 ——
+// —— 429/额度耗尽即时切换 ——
 // 挂 cordis 的 agent/request-error 事件：dsh 的 llm 层遇到 429 时会触发，
 // 我们立刻把 VOLCES_ACTIVE_API_KEY 切到另一个账号，让 dsh-llm-retry 的下一次重试用新 key。
+// 注意：dsh 会把 AccountQuotaExceeded 归一化成 code=QUOTA（见 dsh-llm types/error.js），
+// 429 限流才是 RATE_LIMIT。两者都触发切换。
 const RATE_LIMIT_COOLDOWN_MS = 30 * 1000; // 30 秒冷却，避免两个账号来回抖
 let lastRateLimitSwitch = 0;
 
@@ -274,15 +295,26 @@ async function rotateOnRateLimit(ctx) {
   if (arkKeys[1] === undefined) return;
   const current = (await credentials.resolve("VOLCES_ACTIVE_API_KEY"))?.value;
   if (!current) return;
+  // 实时查各账号用量，优先切到"未耗尽"的账号（避免切到同样 monthly 用尽的账号）
+  let preferred = [];
+  try {
+    const accounts = loadAccounts();
+    const quota = await queryQuota(accounts);
+    preferred = quota
+      .filter((q) => q.ok && !quotaExhausted(q))
+      .filter((q) => arkKeys[q.idx] && arkKeys[q.idx] !== current)
+      .sort((a, b) => a.session - b.session)
+      .map((q) => q.idx);
+  } catch (e) {}
   const targets = Object.keys(arkKeys)
     .map(Number)
     .filter((k) => arkKeys[k] && arkKeys[k] !== current)
     .sort();
-  if (targets.length === 0) return;
-  const nextIdx = targets[0];
+  const nextIdx = preferred.length > 0 ? preferred[0] : targets[0];
+  if (nextIdx === undefined) return;
   try {
     await credentials.set("VOLCES_ACTIVE_API_KEY", arkKeys[nextIdx]);
-    debugLog(`429-SWITCHED -> #${nextIdx} (RATE_LIMIT on current key)`);
+    debugLog(`429/QUOTA-SWITCHED -> #${nextIdx} (current key ${current ? current.slice(-8) : "?"})`);
   } catch (e) {
     debugLog(`429-switch set refused: ${String((e && e.message) || e)}`);
   }
@@ -293,7 +325,7 @@ function installRateLimitRotation(ctx) {
     try {
       if (
         payload && payload.failure &&
-        payload.failure.code === "RATE_LIMIT" &&
+        (payload.failure.code === "RATE_LIMIT" || payload.failure.code === "QUOTA") &&
         payload.provider === "volces"
       ) {
         const now = Date.now();
