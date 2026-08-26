@@ -225,6 +225,7 @@ dsh-whale-widget-plus/
 | 台词手动切换 | ![台词切换](docs/screenshots/台词可手动切换.png) |
 | 第一版总览 | ![第一版](docs/screenshots/版本1总览.png) |
 | 第二版总览 | ![第二版](docs/screenshots/版本2总览.png) |
+| 第三版总览 | ![第三版](docs/screenshots/版本3总览.png) |
 
 更多截图：`docs/screenshots/`（版本1-1~4、版本2-1~2 细节图）。
 
