@@ -2,11 +2,11 @@
   <img src="assets/DSH2.png" width="820" alt="DSH 小鲸鱼余额挂件">
 </p>
 
-<h1 align="center">DSH 小鲸鱼余额挂件 · 双版本表情版</h1>
+<h1 align="center">DSH 小鲸鱼余额挂件 · 三版本表情版</h1>
 
 <p align="center">
   dsh-whale-widget-plus — DeepSeek Harness 网页右下角的常驻小鲸鱼挂件<br>
-  <strong>两套表情素材切换</strong> · 火山 Coding Plan 用量 / DeepSeek 余额双模式 · 情绪动画 · 自定义台词
+  <strong>三套表情素材切换</strong> · 火山 Coding Plan 用量 / DeepSeek 余额双模式 · 情绪动画 · 自定义台词
 </p>
 
 ---
@@ -219,7 +219,7 @@ dsh-whale-widget-plus/
 
 | 功能 | 截图 |
 |------|------|
-| 两版表情切换 | ![两版切换](docs/screenshots/两版表情版本切换.png) |
+| 三版表情切换 | ![三版切换](docs/screenshots/两版表情版本切换.png) |
 | 手动表情选择 | ![手动表情](docs/screenshots/表情可手动选择固定.png) |
 | 自定义台词 | ![自定义台词](docs/screenshots/自定义台词.png) |
 | 台词手动切换 | ![台词切换](docs/screenshots/台词可手动切换.png) |
@@ -237,7 +237,7 @@ dsh-whale-widget-plus/
 
 ## 🙏 致谢
 
-基于 B站「月匠」的 DSH 小鲸鱼余额挂件（npm `dsh-whale-widget-plus`）二次开发；表情素材来自 MeteorNOX/DeepSeek-Balance-Whale-Widget 桌面版二创，经人工校色；功能大幅扩展。
+基于 B站「月匠」的 DSH 小鲸鱼余额挂件（npm `dsh-whale-widget`）二次开发；表情素材来自 MeteorNOX/DeepSeek-Balance-Whale-Widget 桌面版二创，经人工校色；功能大幅扩展。
 
 ## 📄 许可证
 
